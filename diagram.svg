@@ -1,0 +1,53 @@
+<svg viewBox="0 0 800 200" width="800" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="800" height="200" fill="#f8f9fb"/>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#ddd"/>
+    </marker>
+  </defs>
+
+  <!-- 1단계: 기획 (파스텔 파란색) -->
+  <g>
+    <rect x="20" y="50" width="120" height="100" rx="12" fill="#c5e4f3" stroke="#5ba3d0" stroke-width="2"/>
+    <text x="80" y="105" font-family="'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#2c5aa0">기획</text>
+  </g>
+
+  <!-- 화살표 1 -->
+  <line x1="145" y1="100" x2="175" y2="100" stroke="#ddd" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <!-- 2단계: 제작 (파스텔 초록색) -->
+  <g>
+    <rect x="180" y="50" width="120" height="100" rx="12" fill="#c1f0d1" stroke="#52b788" stroke-width="2"/>
+    <text x="240" y="105" font-family="'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#2d6a4f">제작</text>
+  </g>
+
+  <!-- 화살표 2 -->
+  <line x1="305" y1="100" x2="335" y2="100" stroke="#ddd" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <!-- 3단계: 검토 (파스텔 자주색) -->
+  <g>
+    <rect x="340" y="50" width="120" height="100" rx="12" fill="#e8d5f2" stroke="#b195c4" stroke-width="2"/>
+    <text x="400" y="105" font-family="'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#5a3d6f">검토</text>
+  </g>
+
+  <!-- 화살표 3 -->
+  <line x1="465" y1="100" x2="495" y2="100" stroke="#ddd" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <!-- 4단계: 배포 (파스텔 주황색) -->
+  <g>
+    <rect x="500" y="50" width="120" height="100" rx="12" fill="#f5d9c3" stroke="#e8a76a" stroke-width="2"/>
+    <text x="560" y="105" font-family="'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#b85c2a">배포</text>
+  </g>
+
+  <!-- 화살표 4 -->
+  <line x1="625" y1="100" x2="655" y2="100" stroke="#ddd" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <!-- 5단계: 분석 (파스텔 핑크색) -->
+  <g>
+    <rect x="660" y="50" width="120" height="100" rx="12" fill="#f5d4e5" stroke="#d896c8" stroke-width="2"/>
+    <text x="720" y="105" font-family="'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#a83e5f">분석</text>
+  </g>
+</svg>

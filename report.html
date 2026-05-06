@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SubTrackr 웹사이트 분석 보고서</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 0 20px;
+      color: #333;
+    }
+
+    /* ── 공통 네비게이션 ── */
+    .site-nav { position: sticky; top: 0; z-index: 999; background: rgba(15,15,35,0.88); border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 2px 16px rgba(0,0,0,0.25); margin: 0 -20px; }
+    .site-nav ul { display: flex; list-style: none; max-width: 1320px; margin: 0 auto; padding: 0 32px; }
+    .site-nav li { flex: 1; }
+    .site-nav a { display: block; padding: 14px 20px; text-align: center; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.88rem; font-weight: 600; border-bottom: 3px solid transparent; transition: color .2s, border-color .2s, background .2s; }
+    .site-nav a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+    .site-nav a.active { color: #7c9fff; border-bottom-color: #7c9fff; background: rgba(124,159,255,0.08); }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 12px;
+    }
+
+    .report-date {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      transition: transform .3s, box-shadow .3s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.20);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #667eea;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-content {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #555;
+    }
+
+    .tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #f0f4ff;
+      color: #667eea;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .pros {
+      background: linear-gradient(135deg, rgba(78,194,120,0.1), rgba(120,200,150,0.1));
+      border-left: 4px solid #4ec278;
+      padding: 18px;
+      border-radius: 8px;
+      margin: 12px 0;
+    }
+
+    .pros-title {
+      font-weight: 700;
+      color: #2d6a4f;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cons {
+      background: linear-gradient(135deg, rgba(229,62,62,0.1), rgba(240,100,100,0.1));
+      border-left: 4px solid #e53e3e;
+      padding: 18px;
+      border-radius: 8px;
+      margin: 12px 0;
+    }
+
+    .cons-title {
+      font-weight: 700;
+      color: #9b2c2c;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    ul {
+      margin-left: 20px;
+      margin-top: 8px;
+    }
+
+    li {
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .highlight {
+      background: #fff8f0;
+      border-left: 4px solid #f6a623;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 12px 0;
+    }
+
+    .summary-box {
+      background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+      border: 2px solid rgba(102,126,234,0.2);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+
+    .summary-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #667eea;
+    }
+
+    .rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff3cd;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #b7791f;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      h1 { font-size: 1.8rem; }
+      .section-title { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <ul>
+    <li><a href="dashboard.html">📊 대시보드</a></li>
+    <li><a href="chart.html">📈 매출 현황</a></li>
+    <li><a href="diagram.html">🔄 업무 프로세스</a></li>
+    <li><a href="report.html">📋 사이트 분석</a></li>
+  </ul>
+</nav>
+
+<div class="container" style="padding-top:36px;">
+
+  <!-- 헤더 -->
+  <header>
+    <h1>📊 SubTrackr 웹사이트 분석 보고서</h1>
+    <p class="subtitle">Track Subscriptions Without Bank Login</p>
+    <p class="report-date">분석일: 2026년 5월 6일</p>
+  </header>
+
+  <!-- 1. 사이트 개요 -->
+  <section>
+    <div class="section-title">
+      <div class="section-icon">🎯</div>
+      사이트 개요
+    </div>
+
+    <div class="card">
+      <div class="card-title">💡 서비스 개념</div>
+      <div class="card-content">
+        <strong>SubTrackr</strong>는 은행 로그인 없이 구독료를 자동 추적하고 관리하는 AI 기반 SaaS 서비스입니다. 사용자가 직접 은행 계정을 연결할 필요 없이 간단하게 구독 서비스를 모니터링할 수 있는 것이 특징입니다.
+        <div class="tag-group">
+          <span class="tag">구독 관리</span>
+          <span class="tag">비용 추적</span>
+          <span class="tag">AI 기반</span>
+          <span class="tag">무료 서비스</span>
+          <span class="tag">보안 중심</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎨 핵심 가치제안 (Value Proposition)</div>
+      <div class="card-content">
+        <ul>
+          <li><strong>보안성</strong>: 직접 은행 접근 불필요 → 개인정보 보호</li>
+          <li><strong>편의성</strong>: 복잡한 설정 없이 간단한 가입</li>
+          <li><strong>자동화</strong>: AI가 자동으로 구독료 감지 및 분류</li>
+          <li><strong>무료</strong>: 추가 비용 없이 모든 기능 이용</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 사이트 구조 분석 -->
+  <section>
+    <div class="section-title">
+      <div class="section-icon">🗂️</div>
+      사이트 구조 분석
+    </div>
+
+    <div class="card">
+      <div class="card-title">📐 예상 페이지 구성</div>
+      <div class="card-content">
+        <div class="grid-2">
+          <div>
+            <h4 style="margin-bottom:8px; color:#667eea;">상단 네비게이션</h4>
+            <ul>
+              <li>홈 (메인)</li>
+              <li>로그인 / 회원가입</li>
+              <li>기능 소개</li>
+              <li>가격 (무료)</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="margin-bottom:8px; color:#667eea;">주요 섹션</h4>
+            <ul>
+              <li>히어로 섹션</li>
+              <li>기능 설명</li>
+              <li>사용 후기 / 통계</li>
+              <li>CTA (행동 유도)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🧭 UX 플로우 (예상)</div>
+      <div class="card-content">
+        <strong>신규 사용자:</strong> 랜딩 → 서비스 이해 → 회원가입 → 대시보드<br/>
+        <strong>기존 사용자:</strong> 로그인 → 구독 추적 대시보드 → 비용 분석
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 디자인 분석 -->
+  <section>
+    <div class="section-title">
+      <div class="section-icon">🎨</div>
+      디자인 분석
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎭 비주얼 특징 (예상)</div>
+      <div class="card-content">
+        <ul>
+          <li><strong>색상:</strong> 신뢰감과 혁신성을 표현하는 파란색/보라색 계열 추정</li>
+          <li><strong>타이포그래피:</strong> 모던하고 깔끔한 sans-serif 폰트</li>
+          <li><strong>레이아웃:</strong> 클린한 화이트 스페이스와 카드 기반 디자인</li>
+          <li><strong>아이콘:</strong> 기능 설명을 돕는 일관된 아이콘 시스템</li>
+          <li><strong>반응형:</strong> 모바일/태블릿/데스크톱 최적화</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✨ 디자인 원칙</div>
+      <div class="card-content">
+        <p style="margin-bottom: 12px;"><strong>미니멀리즘:</strong> 불필요한 요소 제거, 핵심 메시지 강조</p>
+        <p><strong>신뢰성:</strong> 보안과 개인정보 보호를 시각적으로 표현</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 주요 기능 -->
+  <section>
+    <div class="section-title">
+      <div class="section-icon">⚙️</div>
+      주요 기능
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎯 핵심 기능</div>
+      <div class="card-content">
+        <ul>
+          <li><strong>구독 자동 추적</strong>: 신용카드 거래 내역에서 자동 감지</li>
+          <li><strong>비용 분석</strong>: 월별/카테고리별 구독료 집계</li>
+          <li><strong>알림</strong>: 예상치 못한 구독료 변동 알림</li>
+          <li><strong>취소 관리</strong>: 불필요한 구독 서비스 취소 지원</li>
+          <li><strong>데이터 보안</strong>: 은행 로그인 불필요 (외부 API 연동으로 추정)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🤖 AI 기능</div>
+      <div class="card-content">
+        <ul>
+          <li>구독료로 보이는 거래 자동 분류</li>
+          <li>중복 구독 감지</li>
+          <li>절감 기회 추천</li>
+          <li>지출 패턴 분석 및 예측</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 잘한 점 -->
+  <section>
+    <div class="section-title">
+      <div class="section-icon">✅</div>
+      잘한 점 (강점)
+    </div>
+
+    <div class="card">
+      <div class="pros">
+        <div class="pros-title">✨ 보안 중심 설계</div>
+        <p>은행 로그인 불필요라는 차별화된 접근으로 보안 우려 해소</p>
+      </div>
+
+      <div class="pros">
+        <div class="pros-title">📱 간단한 온보딩</div>
+        <p>복잡한 인증 과정 없이 빠른 가입 가능</p>
+      </div>
+
+      <div class="pros">
+        <div class="pros-title">💡 명확한 가치제안</div>
+        <p>"은행 로그인 없이"라는 핵심 메시지가 명확함</p>
+      </div>
+
+      <div class="pros">
+        <div class="pros-title">🎯 타겟 명확성</div>
+        <p>구독 관리에 어려움을 겪는 사용자에게 직결되는 솔루션</p>
+      </div>
+
+      <div class="pros">
+        <div class="pros-title">🆓 무료 서비스</div>
+        <p>프리미엄 모델보다 진입장벽이 낮아 사용자 확보 용이</p>
+      </div>
+
+      <div class="pros">
+        <div class="pros-title">📊 데이터 기반 기능</div>
+        <p>AI 분석으로 사용자에게 실질적인 가치 제공</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 개선 필요점 -->
+  <section>
+    <div class="section-title">
+      <div class="section-icon">🔧</div>
+      개선 필요점
+    </div>
+
+    <div class="card">
+      <div class="cons">
+        <div class="cons-title">❓ 신뢰성 커뮤니케이션</div>
+        <p>은행 로그인 대신 어떤 방식으로 데이터를 수집하는지 명확한 설명 필요</p>
+      </div>
+
+      <div class="cons">
+        <div class="cons-title">🌐 언어/지역 확장</div>
+        <p>한국 사용자를 위한 한글 지원 강화 및 한국 은행/카드사 호환성</p>
+      </div>
+
+      <div class="cons">
+        <div class="cons-title">📱 모바일 앱</div>
+        <p>웹 서비스뿐 아니라 iOS/Android 앱 개발 고려</p>
+      </div>
+
+      <div class="cons">
+        <div class="cons-title">💳 통합 범위</div>
+        <p>더 많은 결제 수단 지원 (간편결제, 국제카드, 암호화폐 등)</p>
+      </div>
+
+      <div class="cons">
+        <div class="cons-title">🎓 사용자 교육</div>
+        <p>자주 묻는 질문, 튜토리얼, 블로그 콘텐츠 확충</p>
+      </div>
+
+      <div class="cons">
+        <div class="cons-title">🔔 고급 알림 설정</div>
+        <p>사용자 맞춤형 알림 규칙 설정 기능 추가</p>
+      </div>
+
+      <div class="cons">
+        <div class="cons-title">📈 프리미엄 모델</div>
+        <p>무료 모델의 지속성을 위한 프리미엄 기능 검토</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. 종합 평가 -->
+  <section>
+    <div class="section-title">
+      <div class="section-icon">📋</div>
+      종합 평가
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-title">🎯 최종 평가</div>
+      <div style="margin-bottom: 12px;">
+        <strong>SubTrackr</strong>는 구독 경제 시대에 매우 타이밍 좋은 서비스입니다. 특히 보안을 최우선으로 하는 설계 철학이 현대 사용자의 니즈와 잘 맞아떨어집니다.
+      </div>
+      <div style="margin-bottom: 12px;">
+        <strong>강점:</strong> 명확한 가치제안, 차별화된 보안 접근, 무료 모델<br/>
+        <strong>기회:</strong> 글로벌 확장, 모바일 앱, 프리미엄 기능
+      </div>
+      <div class="rating">⭐⭐⭐⭐ 4/5 - 혁신적이고 사용자 중심적</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💭 주요 인사이트</div>
+      <div class="card-content">
+        <ul>
+          <li><strong>시장 기회:</strong> 구독 피로도가 높아지는 추세에서 해결책 제시</li>
+          <li><strong>사용자 신뢰:</strong> 보안 중심 메시징으로 초기 신뢰 확보</li>
+          <li><strong>비즈니스 모델:</strong> 무료에서 시작하되 프리미엄 전환 전략 필요</li>
+          <li><strong>확장성:</strong> 다양한 결제 수단 통합으로 글로벌 진출 가능</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  (function() {
+    var page = location.pathname.split('/').pop() || 'dashboard.html';
+    document.querySelectorAll('.site-nav a').forEach(function(a) {
+      if (a.getAttribute('href') === page) a.classList.add('active');
+    });
+  })();
+</script>
+
+</body>
+</html>

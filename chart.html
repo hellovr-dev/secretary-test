@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>매출 현황 분석 차트</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 0 20px;
+    }
+
+    /* ── 공통 네비게이션 ── */
+    .site-nav { position: sticky; top: 0; z-index: 999; background: rgba(15,15,35,0.88); border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 2px 16px rgba(0,0,0,0.25); margin: 0 -20px; }
+    .site-nav ul { display: flex; list-style: none; max-width: 1320px; margin: 0 auto; padding: 0 32px; }
+    .site-nav li { flex: 1; }
+    .site-nav a { display: block; padding: 14px 20px; text-align: center; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.88rem; font-weight: 600; border-bottom: 3px solid transparent; transition: color .2s, border-color .2s, background .2s; }
+    .site-nav a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+    .site-nav a.active { color: #7c9fff; border-bottom-color: #7c9fff; background: rgba(124,159,255,0.08); }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.85);
+      font-weight: 300;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin-bottom: 20px;
+    }
+
+    .chart-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      transition: transform .3s, box-shadow .3s;
+    }
+
+    .chart-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.20);
+    }
+
+    .chart-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #1a1a2e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+      display: block;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+      border: 1px solid rgba(102,126,234,0.2);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #667eea;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #666;
+      font-weight: 500;
+    }
+
+    @media (max-width: 900px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 16px;
+      font-size: 0.85rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+
+    .line-chart-legend { justify-content: center; }
+    .bar-chart-legend { justify-content: flex-start; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <ul>
+    <li><a href="dashboard.html">📊 대시보드</a></li>
+    <li><a href="chart.html">📈 매출 현황</a></li>
+    <li><a href="diagram.html">🔄 업무 프로세스</a></li>
+    <li><a href="report.html">📋 사이트 분석</a></li>
+  </ul>
+</nav>
+
+<div class="container" style="padding-top:36px;">
+
+  <header>
+    <h1>📊 매출 현황 분석</h1>
+    <p class="subtitle">2026년 1월 ~ 2월 매출 데이터 기반</p>
+  </header>
+
+  <div class="charts-grid">
+
+    <!-- 월별 매출 추이 -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <div class="chart-icon">📈</div>
+        월별 매출 추이
+      </div>
+      <canvas id="lineChart" width="400" height="280"></canvas>
+      <div class="legend line-chart-legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background:#4f6ef7;"></div>
+          <span>월별 총 매출</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 제품별 매출 비교 -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <div class="chart-icon">📊</div>
+        제품별 매출 비교
+      </div>
+      <canvas id="barChart" width="400" height="280"></canvas>
+      <div class="legend bar-chart-legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background:#4f6ef7;"></div>
+          <span>전자기기</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#38b2ac;"></div>
+          <span>생활용품</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 통계 카드 -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value" id="totalSales">0</div>
+      <div class="stat-label">누적 총 매출</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="avgMonthly">0</div>
+      <div class="stat-label">월 평균 매출</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="topProduct">0</div>
+      <div class="stat-label">최고 판매 제품</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ═════════════════════════════════════════
+  // 데이터
+  // ═════════════════════════════════════════
+
+  const monthlyData = {
+    '1월': 46499000,
+    '2월': 24507000  // 부분 데이터
+  };
+
+  const productData = {
+    '무선 이어폰': 28836000,
+    '블루투스 스피커': 9600000,
+    '보조배터리': 9030000,
+    '무선 충전기': 5850000,
+    '텀블러': 11525000,
+    '에코백': 6165000
+  };
+
+  const categoryData = {
+    '전자기기': 53316000,
+    '생활용품': 17690000
+  };
+
+  // ═════════════════════════════════════════
+  // 유틸
+  // ═════════════════════════════════════════
+
+  function formatNumber(num) {
+    return num.toLocaleString('ko-KR');
+  }
+
+  function drawLineChart(canvasId, months, values, color = '#4f6ef7') {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+
+    // HiDPI 조정
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const width = rect.width;
+    const height = rect.height;
+    const padding = { top: 40, right: 30, bottom: 50, left: 60 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+
+    const maxValue = Math.max(...values) * 1.1;
+    const minValue = 0;
+
+    // 배경
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, width, height);
+
+    // 그리드 라인
+    ctx.strokeStyle = '#e8e8f0';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) {
+      const y = padding.top + (chartHeight / 5) * i;
+      ctx.beginPath();
+      ctx.moveTo(padding.left, y);
+      ctx.lineTo(width - padding.right, y);
+      ctx.stroke();
+    }
+
+    // Y축 레이블
+    ctx.fillStyle = '#888';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 5; i++) {
+      const value = (maxValue / 5) * i;
+      const y = padding.top + chartHeight - (chartHeight / 5) * i;
+      ctx.fillText(formatNumber(Math.round(value)), padding.left - 10, y + 4);
+    }
+
+    // Y축 라인
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, padding.top);
+    ctx.lineTo(padding.left, height - padding.bottom);
+    ctx.stroke();
+
+    // X축 라인
+    ctx.beginPath();
+    ctx.moveTo(padding.left, height - padding.bottom);
+    ctx.lineTo(width - padding.right, height - padding.bottom);
+    ctx.stroke();
+
+    // 데이터 포인트 & 선
+    const pointX = (i) => padding.left + (chartWidth / (months.length - 1)) * i;
+    const pointY = (val) => padding.top + chartHeight - ((val - minValue) / (maxValue - minValue)) * chartHeight;
+
+    // 선 그리기
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(pointX(0), pointY(values[0]));
+    for (let i = 1; i < values.length; i++) {
+      ctx.lineTo(pointX(i), pointY(values[i]));
+    }
+    ctx.stroke();
+
+    // 포인트 & 데이터 레이블
+    for (let i = 0; i < values.length; i++) {
+      const x = pointX(i);
+      const y = pointY(values[i]);
+
+      // 원형 포인트
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 포인트 배경
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 데이터 라벨
+      ctx.fillStyle = '#333';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(formatNumber(values[i]), x, y - 15);
+
+      // X축 라벨
+      ctx.fillStyle = '#666';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(months[i], x, height - padding.bottom + 20);
+    }
+  }
+
+  function drawBarChart(canvasId, categories, values, colors = ['#4f6ef7', '#38b2ac']) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const width = rect.width;
+    const height = rect.height;
+    const padding = { top: 40, right: 30, bottom: 60, left: 60 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+
+    const maxValue = Math.max(...values.flat()) * 1.15;
+
+    // 배경
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, width, height);
+
+    // 그리드 라인
+    ctx.strokeStyle = '#e8e8f0';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) {
+      const y = padding.top + (chartHeight / 5) * i;
+      ctx.beginPath();
+      ctx.moveTo(padding.left, y);
+      ctx.lineTo(width - padding.right, y);
+      ctx.stroke();
+    }
+
+    // Y축 레이블
+    ctx.fillStyle = '#888';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 5; i++) {
+      const value = (maxValue / 5) * i;
+      const y = padding.top + chartHeight - (chartHeight / 5) * i;
+      ctx.fillText(formatNumber(Math.round(value)), padding.left - 10, y + 4);
+    }
+
+    // 축 라인
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, padding.top);
+    ctx.lineTo(padding.left, height - padding.bottom);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(padding.left, height - padding.bottom);
+    ctx.lineTo(width - padding.right, height - padding.bottom);
+    ctx.stroke();
+
+    // 막대 그리기
+    const barWidth = chartWidth / categories.length;
+    const barSpacing = barWidth * 0.15;
+    const actualBarWidth = (barWidth - barSpacing * 2) / values[0].length;
+
+    categories.forEach((category, catIndex) => {
+      const baseX = padding.left + barWidth * catIndex + barSpacing;
+
+      values.forEach((valArray, valIndex) => {
+        const x = baseX + actualBarWidth * valIndex;
+        const value = valArray[catIndex];
+        const barHeight = (value / maxValue) * chartHeight;
+        const y = height - padding.bottom - barHeight;
+
+        ctx.fillStyle = colors[valIndex];
+        ctx.fillRect(x, y, actualBarWidth, barHeight);
+
+        // 값 라벨
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(formatNumber(value), x + actualBarWidth / 2, y - 5);
+      });
+
+      // X축 라벨
+      ctx.fillStyle = '#666';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      const labelX = baseX + (actualBarWidth * values[0].length) / 2 - barSpacing / 2;
+      ctx.save();
+      ctx.translate(labelX, height - padding.bottom + 15);
+      ctx.rotate(0);
+      ctx.fillText(category, 0, 0);
+      ctx.restore();
+    });
+  }
+
+  // ═════════════════════════════════════════
+  // 렌더링
+  // ═════════════════════════════════════════
+
+  window.addEventListener('load', () => {
+    // 월별 매출 추이
+    const months = Object.keys(monthlyData);
+    const monthlyValues = Object.values(monthlyData);
+    drawLineChart('lineChart', months, monthlyValues, '#4f6ef7');
+
+    // 제품별 매출 비교
+    const products = Object.keys(productData);
+    const productValues = Object.values(productData);
+
+    // 전자기기 / 생활용품 분류
+    const electronics = [28836000, 9600000, 9030000, 5850000, 0, 0];
+    const consumables = [0, 0, 0, 0, 11525000, 6165000];
+
+    drawBarChart('barChart', products, [electronics, consumables], ['#4f6ef7', '#38b2ac']);
+
+    // 통계 업데이트
+    const totalSales = monthlyValues.reduce((a, b) => a + b, 0);
+    const avgMonthly = totalSales / months.length;
+    const topProductName = Object.entries(productData).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+
+    document.getElementById('totalSales').textContent = formatNumber(totalSales);
+    document.getElementById('avgMonthly').textContent = formatNumber(Math.round(avgMonthly));
+    document.getElementById('topProduct').textContent = topProductName;
+  });
+
+  // 반응형
+  window.addEventListener('resize', () => {
+    const months = Object.keys(monthlyData);
+    const monthlyValues = Object.values(monthlyData);
+    drawLineChart('lineChart', months, monthlyValues, '#4f6ef7');
+
+    const products = Object.keys(productData);
+    const electronics = [28836000, 9600000, 9030000, 5850000, 0, 0];
+    const consumables = [0, 0, 0, 0, 11525000, 6165000];
+    drawBarChart('barChart', products, [electronics, consumables], ['#4f6ef7', '#38b2ac']);
+  });
+</script>
+
+<script>
+  (function() {
+    var page = location.pathname.split('/').pop() || 'dashboard.html';
+    document.querySelectorAll('.site-nav a').forEach(function(a) {
+      if (a.getAttribute('href') === page) a.classList.add('active');
+    });
+  })();
+</script>
+
+</body>
+</html>
